@@ -3,7 +3,7 @@
      s.step(dt)            time passes: guests come in and wait, cookers cook, the brother folds
      s.view(p)             what player p's board is doing: { stage, opts: [{ key, right }], prog, need, tray, count, gid }
      s.press(p, i)         player p taps option i of his board: 'ok' | 'oops' | 'busy' | 'locked' | 'none'
-     s.serve(p)            player p serves a ready plate (his own first): true when he did
+     s.serve(p, cooker?)   player p serves a ready plate (that cooker's, or his own first): true when he did
      s.helper(p, n)        the brother makes the next n dumplings on p's board
      s.events              what happened, for the view and the sounds: drained by the game each frame
    A guest's order: { food, filling, shape, cook, count, line }. A dumpling being made goes
@@ -222,9 +222,9 @@
       return out;
     };
 
-    s.serve = function (pi) {
+    s.serve = function (pi, cooker) {
       if (s.over) return false;
-      const r = s.ready(pi)[0];
+      const r = s.ready(pi).find((x) => !cooker || x.c === cooker);
       if (!r) return false;
       const { c, B } = r;
       const g = guest(B.gid);
