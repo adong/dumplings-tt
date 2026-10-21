@@ -406,14 +406,14 @@
     const lx = o.upgrades.lanterns ? [-5.2, -3.4, -1.5, 1.5, 3.4, 5.2] : [-3.4, 3.4];
     for (const x of lx) decor.lanterns.push(lantern(x, o.upgrades.lanterns ? 4.6 : 4.5, x < 0 ? -2.2 : -2.2, o.upgrades.lanterns ? 1.1 : 0.9));
     // the lion dance head by the door
-    if (o.upgrades.lion) decor.lion = lionHead(o.players.length > 1 ? -5.6 : -4.9, 0, 1.6);
+    if (o.upgrades.lion) decor.lion = lionHead(-(cw + 2.75), 0, -2.3);
     // a string of firecrackers on New Year's Eve
     if (o.day.id === 'eve') firecrackers(4.6, 4.6, -3.3);
 
     slotPos = [];
     const near = cw + 0.85, far = cw + 2.05;
     slotPos.push(new T.Vector3(-near, 0, 0.75), new T.Vector3(near, 0, 0.75), new T.Vector3(-far, 0, -0.35), new T.Vector3(far, 0, -0.35));
-    fitW = far + 0.6;
+    fitW = far + 0.95;
   }
 
   const cookFor = (c) => ({ pot: 'boil', steamer: 'steam', wok: 'fry' })[c];
@@ -435,7 +435,7 @@
   function lionHead(x, y, z) {
     const g = new T.Group();
     g.position.set(x, y, z);
-    g.rotation.y = 0.5;
+    g.rotation.y = 0.35;
     roomGroup.add(g);
     const red = lam('#e8382f'), gold = lam('#ffc21a'), white = lam('#ffffff'), dark = lam('#1b1a22');
     box(0.5, 0.9, 0.4, lam('#ffc21a'), -0.2, 0.45, 0, g); box(0.5, 0.9, 0.4, lam('#ffc21a'), 0.2, 0.45, 0, g); // the legs under the costume
@@ -625,7 +625,7 @@
     camera.clearViewOffset();
     const target = new T.Vector3(0, 1.4, -1.0);
     const pts = [];
-    const W = pads.tight ? fitW - 2.0 : fitW;
+    const W = pads.tight ? fitW - 1.7 : fitW;
     for (const s of [-1, 1]) {
       pts.push(new T.Vector3(s * W, 2.5, -0.35), new T.Vector3(s * (W - 1.2), 2.5, 0.75), new T.Vector3(s * (W - 1.2), 0.9, 1.0));
       pts.push(new T.Vector3(s * 2.9, 2.4, -2.85), new T.Vector3(s * 1.4, 3.5, -3.5));
@@ -1056,7 +1056,7 @@
       case 'lucky': {
         const G1 = guests[e.gid];
         if (G1) {
-          const coin = new T.Sprite(new T.SpriteMaterial({ map: new T.CanvasTexture(coinCanvas()), transparent: true }));
+          const coin = new T.Sprite(new T.SpriteMaterial({ map: coinTexture(), transparent: true }));
           coin.scale.setScalar(0.7);
           scene.add(coin);
           const from = G1.a.root.position.clone().add(new T.Vector3(0, 2.0, 0));
@@ -1071,14 +1071,15 @@
     }
   }
 
-  function coinCanvas() {
-    const img = new Image();
+  // the lucky coin: the drawn coin from js/icons.js once its picture decodes, a plain gold disc until then
+  function coinTexture() {
     const [c, g] = makeCanvas(128, 128);
-    img.onload = () => { g.drawImage(img, 0, 0); };
-    img.src = DS.icons.get('coin');
-    // drawn once the image decodes; draw a plain gold disc meanwhile
     g.fillStyle = '#ffd23a'; g.beginPath(); g.arc(64, 64, 50, 0, Math.PI * 2); g.fill();
-    return c;
+    const tex = toTexture(c);
+    const img = new Image();
+    img.onload = () => { g.clearRect(0, 0, 128, 128); g.drawImage(img, 0, 0); tex.needsUpdate = true; };
+    img.src = DS.icons.get('coin');
+    return tex;
   }
 
   function sparkle(pos, color) {
